@@ -21,7 +21,7 @@ public class Task {
     @Id
     @GeneratedValue(strategy = IDENTITY)
     private int id;
-    @NotBlank
+    @NotBlank(message = "Task's description can't be empty")
     private String description;
     private boolean done;
 }
