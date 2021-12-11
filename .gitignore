@@ -1,5 +1,7 @@
 HELP.md
 target/
+todo-db.mv.db
+todo-db.trace.db
 !.mvn/wrapper/maven-wrapper.jar
 !**/src/main/**/target/
 !**/src/test/**/target/
