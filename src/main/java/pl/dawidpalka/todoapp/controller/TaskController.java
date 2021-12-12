@@ -4,12 +4,8 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.data.domain.Pageable;
 import org.springframework.http.ResponseEntity;
-import org.springframework.web.bind.annotation.GetMapping;
-import org.springframework.web.bind.annotation.PathVariable;
-import org.springframework.web.bind.annotation.PostMapping;
-import org.springframework.web.bind.annotation.PutMapping;
-import org.springframework.web.bind.annotation.RequestBody;
-import org.springframework.web.bind.annotation.RestController;
+import org.springframework.transaction.annotation.Transactional;
+import org.springframework.web.bind.annotation.*;
 import pl.dawidpalka.todoapp.model.Task;
 import pl.dawidpalka.todoapp.model.TaskRepository;
 
@@ -55,13 +51,26 @@ public class TaskController {
         return ResponseEntity.created(URI.create("/tasks/" + savedTask.getId())).build();
     }
 
+    @Transactional
     @PutMapping("/tasks/{id}")
-    ResponseEntity<?> updateTask(@PathVariable int id, @RequestBody @Valid Task task) {
+    public ResponseEntity<?> updateTask(@PathVariable int id, @RequestBody @Valid Task toUpdate) {
         if (!taskRepository.existsById(id)) {
             return ResponseEntity.notFound().build();
         }
-        task.setId(id); //protection if in the body is given a different id than in the parameter
-        taskRepository.save(task);
+        taskRepository.findById(id)
+                .ifPresent(task -> task.updateFrom(toUpdate));
         return ResponseEntity.noContent().build();
     }
+
+    @Transactional
+    @PatchMapping("/tasks/{id}")
+    public ResponseEntity<?> toggleTask(@PathVariable int id) {
+        if (!taskRepository.existsById(id)) {
+            return ResponseEntity.notFound().build();
+        }
+        taskRepository.findById(id)
+                .ifPresent(task -> task.setDone(!task.isDone()));
+        return ResponseEntity.noContent().build();
+    }
+
 }
